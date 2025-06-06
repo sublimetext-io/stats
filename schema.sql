@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS package_stats (
+  name TEXT PRIMARY KEY,
+  install INTEGER DEFAULT 0,
+  upgrade INTEGER DEFAULT 0,
+  remove INTEGER DEFAULT 0
+);
