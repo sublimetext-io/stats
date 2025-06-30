@@ -37,7 +37,7 @@ async function handleIngest(url, env) {
   const count = parseInt(url.searchParams.get("count") || "0", 10);
   const key = url.searchParams.get("key");
 
-  if (!env.INGEST_KEY or key !== env.INGEST_KEY) return new Response("Forbidden", { status: 403 });
+  if (!env.INGEST_KEY || key !== env.INGEST_KEY) return new Response("Forbidden", { status: 403 });
   if (!pkg || !VALID_TYPES.includes(type) || count < 0) {
     return new Response("Invalid params", { status: 400 });
   }
@@ -64,7 +64,7 @@ async function handleTotals(url, env) {
 
 async function handleAllTotals(url, env) {
   const key = url.searchParams.get("key");
-  if (!env.INGEST_KEY or key !== env.INGEST_KEY) return new Response("Forbidden", { status: 403 });
+  if (!env.INGEST_KEY || key !== env.INGEST_KEY) return new Response("Forbidden", { status: 403 });
 
   const { results } = await env.DB.prepare(
     "SELECT name, install, upgrade, remove FROM package_stats"

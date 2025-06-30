@@ -4,5 +4,5 @@ main = "src/index.js"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "package-tracker-db"
-database_id = "5e734fad-97e9-4723-a62c-e08c77268df7"
+database_name = "stats"
+database_id = "09800ab7-e5c4-44da-ac0d-cbc588898622"

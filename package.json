@@ -1,4 +1,12 @@
 {
+  "name": "package-tracker",
+  "version": "1.0.0",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "db:migrate": "wrangler d1 execute package-tracker-db --file=./schema.sql",
+    "db:backup": "wrangler d1 export package-tracker-db --output=backup.sql"
+  },
   "devDependencies": {
     "wrangler": "^4.19.1"
   }
