@@ -6,3 +6,7 @@ main = "src/index.js"
 binding = "DB"
 database_name = "stats"
 database_id = "09800ab7-e5c4-44da-ac0d-cbc588898622"
+
+routes = [
+  { pattern = "stats.sublimetext.io", custom_domain = true }
+]
