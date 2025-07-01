@@ -88,6 +88,37 @@ const validation = {
 
     // Store validated params for handler use
     request.validatedParams = params;
+  },
+
+  // Validate batch totals request
+  validateBatchTotals: async (request, env, ctx) => {
+    try {
+      const body = await request.clone().json();
+      
+      if (!body.packages || !Array.isArray(body.packages)) {
+        return new Response("Missing or invalid 'packages' array", { status: 400 });
+      }
+
+      if (body.packages.length === 0) {
+        return new Response("'packages' array cannot be empty", { status: 400 });
+      }
+
+      if (body.packages.length > 100) {
+        return new Response("Maximum 100 packages allowed per request", { status: 400 });
+      }
+
+      // Validate all package names are strings
+      for (const pkg of body.packages) {
+        if (typeof pkg !== 'string' || pkg.trim() === '') {
+          return new Response("All package names must be non-empty strings", { status: 400 });
+        }
+      }
+
+      // Store validated params for handler use
+      request.validatedParams = { packages: body.packages };
+    } catch {
+      return new Response("Invalid JSON", { status: 400 });
+    }
   }
 };
 
@@ -154,6 +185,37 @@ const handlers = {
     }
 
     return Response.json(output);
+  },
+
+  // Get totals for multiple packages
+  async handleBatchTotals(request, env, ctx) {
+    const params = request.validatedParams;
+    const packages = params.packages;
+
+    // Create placeholders for the IN clause
+    const placeholders = packages.map(() => '?').join(',');
+    
+    const { results } = await env.DB.prepare(
+      `SELECT name, install, upgrade, remove FROM package_stats WHERE name IN (${placeholders})`
+    ).bind(...packages).all();
+
+    // Create a map for quick lookup
+    const statsMap = {};
+    for (const row of results) {
+      statsMap[row.name] = {
+        install: row.install,
+        upgrade: row.upgrade,
+        remove: row.remove,
+      };
+    }
+
+    // Build output ensuring all requested packages are included
+    const output = {};
+    for (const pkg of packages) {
+      output[pkg] = statsMap[pkg] || { install: 0, upgrade: 0, remove: 0 };
+    }
+
+    return Response.json(output);
   }
 };
 
@@ -163,6 +225,7 @@ const router = new Router();
 // Public routes
 router.register('GET', '/event', handlers.handleEvent, [validation.validatePackageOperation]);
 router.register('GET', '/totals', handlers.handleTotals);
+router.register('POST', '/totals/batch', handlers.handleBatchTotals, [validation.validateBatchTotals]);
 router.register('GET', '/all-totals', handlers.handleAllTotals);
 
 // Protected routes (require authentication)
